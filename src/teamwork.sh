@@ -178,6 +178,7 @@ teamwork::pull_request_closed() {
   teamwork::add_tag "PR Merged"
   teamwork::remove_tag "PR Open"
   teamwork::remove_tag "PR Approved"
+  teamwork::remove_tag "PR Changes Requested"
   teamwork::move_task_to_column "$BOARD_COLUMN_MERGED"
   else
     teamwork::add_comment "
@@ -186,6 +187,7 @@ teamwork::pull_request_closed() {
 "
     teamwork::remove_tag "PR Open"
     teamwork::remove_tag "PR Approved"
+    teamwork::remove_tag "PR Changes Requested"
     teamwork::move_task_to_column "$BOARD_COLUMN_CLOSED"
   fi
 }
@@ -206,10 +208,24 @@ teamwork::pull_request_review_submitted() {
 ---
 
 Review: **$review_state**
-$comment
+Comment: $comment
 "
     teamwork::add_tag "PR Approved"
+    teamwork::remove_tag "PR Changes Requested"
   fi
+
+  ## Add a message if the PR has change requested, include body message
+  if [ "$review_state" == "changes_requested" ]; then
+      teamwork::add_comment "
+**$user** submitted a change request to the PR: **[$pr_title]($pr_url)**
+Review: **$review_state 😔**
+Comment: $comment
+"
+
+      teamwork::add_tag "PR Changes Requested"
+      teamwork::remove_tag "PR Approved"
+      teamwork::move_task_to_column "$BOARD_COLUMN_REVIEWED"
+    fi
 }
 
 teamwork::pull_request_review_dismissed() {
