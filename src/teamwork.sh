@@ -201,6 +201,11 @@ teamwork::pull_request_review_submitted() {
 
   # Only add a message if the PR has been approved
   if [ "$review_state" == "approved" ]; then
+    local comment_line=""
+    if [ -n "$comment" ] && [ "$comment" != "null" ]; then
+      comment_line="Comment: $comment"
+    fi
+
     teamwork::add_comment "
 **$user** submitted a review to the PR: **$pr_title**
 [$pr_url]($pr_url)
@@ -208,18 +213,28 @@ teamwork::pull_request_review_submitted() {
 ---
 
 Review: **$review_state**
-Comment: $comment
+$comment_line
 "
+
     teamwork::add_tag "PR Approved"
     teamwork::remove_tag "PR Changes Requested"
   fi
 
   ## Add a message if the PR has change requested, include body message
   if [ "$review_state" == "changes_requested" ]; then
+      local comment_line=""
+      if [ -n "$comment" ] && [ "$comment" != "null" ]; then
+        comment_line="Comment: $comment"
+      fi
+
       teamwork::add_comment "
-**$user** submitted a change request to the PR: **[$pr_title]($pr_url)**
-Review: **$review_state 😔**
-Comment: $comment
+**$user** submitted a change request to the PR: **$pr_title**
+[$pr_url]($pr_url)
+
+---
+
+Review: **$review_state**
+$comment_line
 "
 
       teamwork::add_tag "PR Changes Requested"
