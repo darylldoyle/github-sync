@@ -91,10 +91,24 @@ teamwork::add_comment() {
     return
   fi
 
+  # Use jq to properly construct the JSON payload
+  local json_payload
+  json_payload=$(jq -n \
+    --arg body "$body" \
+    --argjson isprivate "$([ "$MAKE_COMMENTS_PRIVATE" == true ] && echo true || echo false)" \
+    '{
+      comment: {
+        body: $body,
+        notify: true,
+        "content-type": "text",
+        isprivate: $isprivate
+      }
+    }')
+
   response=$(curl -X "POST" "$TEAMWORK_URI/tasks/$TEAMWORK_TASK_ID/comments.json" \
        -u "$TEAMWORK_API_TOKEN"':' \
        -H 'Content-Type: application/json; charset=utf-8' \
-       -d "{ \"comment\": { \"body\": \"${body//\"/}\", \"notify\": true, \"content-type\": \"text\", \"isprivate\": $([ "$MAKE_COMMENTS_PRIVATE" == true ] && echo true || echo false) } }" )
+       -d "$json_payload")
 
   log::message "$response"
 }
