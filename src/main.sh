@@ -1,74 +1,65 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=SC1090
-source "$PROJECT_HOME/src/ensure.sh"
-source "$PROJECT_HOME/src/github.sh"
-source "$PROJECT_HOME/src/misc.sh"
-source "$PROJECT_HOME/src/teamwork.sh"
+set -e
 
-main() {
-  log::message "Running the process..."
+# Source all modules
+source "$(dirname "$0")/ensure.sh"
+source "$(dirname "$0")/misc.sh"
+source "$(dirname "$0")/teamwork.sh"
 
-  # Ensure env vars and args exist
-  ensure::env_variable_exist "GITHUB_REPOSITORY"
-  ensure::env_variable_exist "GITHUB_EVENT_PATH"
+# Determine platform and source appropriate functions
+if [ -n "$CI_MERGE_REQUEST_IID" ]; then
+  # GitLab CI/CD - use GitLab functions that map to GitHub-like names
+  source "$(dirname "$0")/gitlab.sh"
+  PLATFORM="gitlab"
+  EVENT_NAME="pull_request"
+  ACTION=$(gitlab::get_action)
+elif [ -n "$GITHUB_EVENT_NAME" ]; then
+  # GitHub Actions
+  source "$(dirname "$0")/github.sh"
+  PLATFORM="github"
+  EVENT_NAME="$GITHUB_EVENT_NAME"
+  ACTION=$(github::get_action)
+else
+  log::message "Unknown CI platform"
+  exit 1
+fi
 
-  export GITHUB_TOKEN="$1"
-  export TEAMWORK_URI="$2"
-  export TEAMWORK_API_TOKEN="$3"
-  export AUTOMATIC_TAGGING="$4"
-  export MAKE_COMMENTS_PRIVATE="$5"
-  export BOARD_COLUMN_OPENED="$6"
-  export BOARD_COLUMN_MERGED="$7"
-  export BOARD_COLUMN_CLOSED="$8"
+# Ensure all required environment variables are set
+ensure::env TEAMWORK_URI
+ensure::env TEAMWORK_API_TOKEN
 
-  env::set_environment
+# Extract task IDs from PR/MR body (using same function name)
+if [ "$PLATFORM" == "gitlab" ]; then
+  export TEAMWORK_TASK_IDS=$(teamwork::get_task_id_from_body "$(gitlab::get_pr_body)")
+else
+  export TEAMWORK_TASK_IDS=$(teamwork::get_task_id_from_body "$(github::get_pr_body)")
+fi
 
-  # Check if there is a task link in the PR
-  local -r pr_body=$(github::get_pr_body)
-  local -r task_ids_str=$(teamwork::get_task_id_from_body "$pr_body" )
+if [ -z "$TEAMWORK_TASK_IDS" ]; then
+  log::message "No task IDs found in description/body"
+  exit 0
+fi
 
-  if [ "$task_ids_str" == "" ]; then
-    log::message "Task not found"
-    exit 0
-  fi
+# Process each task using existing teamwork functions
+IFS=',' read -ra TASK_ID_ARRAY <<< "$TEAMWORK_TASK_IDS"
+for task_id in "${TASK_ID_ARRAY[@]}"; do
+  export TEAMWORK_TASK_ID="$task_id"
+  export TEAMWORK_PROJECT_ID=$(teamwork::get_project_id_from_task "$task_id")
 
-  local -r event=$(github::get_event_name)
-  local -r action=$(github::get_action)
-
-  log::message "Event: $event - Action: $action"
-
-  local project_id
-  IFS=',' read -r -a task_ids <<< "$task_ids_str"
-  for task_id in "${task_ids[@]}"; do
-    log::message "Task found with the id: $task_id"
-
-    export TEAMWORK_TASK_ID=$task_id
-    project_id="$(teamwork::get_project_id_from_task "$task_id")"
-    export TEAMWORK_PROJECT_ID=$project_id
-
-    ignored_project_ids=("${IGNORE_PROJECT_IDS:-}")
-    if utils::in_array "$project_id" "${ignored_project_ids[*]}"
-    then
-        log::message "ignored due to IGNORE_PROJECT_IDS"
-        exit 0
-    fi
-
-    if [ "$event" == "pull_request" ] && [ "$action" == "opened" ]; then
-      teamwork::pull_request_opened
-    elif [ "$event" == "pull_request" ] && [ "$action" == "closed" ]; then
-      teamwork::pull_request_closed
-    elif [ "$event" == "pull_request_review" ] && [ "$action" == "submitted" ]; then
-      teamwork::pull_request_review_submitted
-    elif [ "$event" == "pull_request_review" ] && [ "$action" == "dismissed" ]; then
-      teamwork::pull_request_review_dismissed
-    elif [ "$ENV" == "test" ]; then # always run pull_request_opened at the very least when in test
-      teamwork::pull_request_opened
-    else
-      log::message "Operation not allowed"
-      exit 0
-    fi
-  done
-
-  exit $?
-}
+  # Use existing event handling logic - works for both platforms!
+  case "$EVENT_NAME" in
+    "pull_request")
+      case "$ACTION" in
+        "opened") teamwork::pull_request_opened ;;
+        "closed") teamwork::pull_request_closed ;;
+      esac
+      ;;
+    "pull_request_review")
+      case "$ACTION" in
+        "submitted") teamwork::pull_request_review_submitted ;;
+        "dismissed") teamwork::pull_request_review_dismissed ;;
+      esac
+      ;;
+  esac
+done
