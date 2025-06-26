@@ -1,0 +1,25 @@
+stages:
+    - teamwork-sync
+
+variables:
+    TEAMWORK_URI: "your-teamwork-domain"
+    TEAMWORK_API_TOKEN: $TEAMWORK_API_TOKEN
+    AUTOMATIC_TAGGING: "true"
+    MAKE_COMMENTS_PRIVATE: "true"
+    BOARD_COLUMN_OPENED: "PR Open"
+    BOARD_COLUMN_MERGED: "Ready to Test"
+    BOARD_COLUMN_CLOSED: "Rejected"
+    BOARD_COLUMN_REVIEWED: "In Review"
+
+teamwork-merge-request-sync:
+    stage: teamwork-sync
+    image: alpine:latest
+    before_script:
+        - apk add --no-cache bash curl jq
+    script:
+        - chmod +x ./src/main.sh
+        - ./src/main.sh
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    variables:
+        ENV: "production"
