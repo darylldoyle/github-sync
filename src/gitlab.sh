@@ -127,7 +127,7 @@ gitlab::get_pr_patch_stats() {
 # ------------------------------------------------------------------------------
 gitlab::get_review_state() {
   # Handle webhook approval events
-  if [ "$TW_EVENT_TYPE" == "approval" ]; then
+  if [ "$CI_MERGE_REQUEST_EVENT_TYPE" == "approval_webhook" ]; then
     echo "APPROVED"
     return
   fi
@@ -160,6 +160,7 @@ gitlab::get_review_state() {
     echo "PENDING"
   fi
 }
+
 
 # ------------------------------------------------------------------------------
 # Placeholder for retrieving review comment in GitLab.
