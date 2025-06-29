@@ -16,6 +16,22 @@ teamwork:
         - |
             git clone -b develop https://github.com/darylldoyle/github-sync.git /tmp/teamwork-sync
             cd /tmp/teamwork-sync
+            
+            # Set event variables based on webhook or CI/CD context
+            if [ "$CI_PIPELINE_SOURCE" == "trigger" ] && [ "$event_type" == "merge_request" ] && [ "$action" == "approved" ] && [ $merge_request_id == $CI_MERGE_REQUEST_ID ]; then
+                # This is a webhook approval event
+                export TW_EVENT_TYPE="approval"
+                export TW_MERGE_REQUEST_ID="$merge_request_id"
+                # You might need to fetch additional MR details using the GitLab API
+                echo "Processing webhook approval event for MR #$merge_request_id"
+            else
+                # This is a regular merge request event
+                export TW_EVENT_TYPE="$CI_MERGE_REQUEST_EVENT_TYPE"
+                export TW_MERGE_REQUEST_ID="$CI_MERGE_REQUEST_IID"
+                echo "Processing regular MR event: $TW_EVENT_TYPE for MR #$TW_MERGE_REQUEST_ID"
+            fi
+        
+
             export TEAMWORK_URI="${TEAMWORK_URI}"
             export TEAMWORK_API_TOKEN="${TEAMWORK_API_TOKEN}"
             export AUTOMATIC_TAGGING="${AUTOMATIC_TAGGING:-true}"
@@ -31,9 +47,11 @@ teamwork:
             echo "Running Teamwork GitLab integration"
             echo "CI_MERGE_REQUEST_IID: $CI_MERGE_REQUEST_IID"
             echo "CI_MERGE_REQUEST_TITLE: $CI_MERGE_REQUEST_TITLE"
-            
+
             # Use entrypoint.sh which will handle execution correctly
             chmod +x ./entrypoint.sh
             ./entrypoint.sh
     rules:
         - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        - if: '$CI_PIPELINE_SOURCE == "trigger" && $event_type == "merge_request" && $action == "approved" && $merge_request_id'  # Webhook approval events
+

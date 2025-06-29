@@ -126,6 +126,12 @@ gitlab::get_pr_patch_stats() {
 # @return string Review state.
 # ------------------------------------------------------------------------------
 gitlab::get_review_state() {
+  # Handle webhook approval events
+  if [ "$TW_EVENT_TYPE" == "approval" ]; then
+    echo "APPROVED"
+    return
+  fi
+
   # get the approval state of the merge request
   if [ "$ENV" == "test" ]; then
     echo "APPROVED"
