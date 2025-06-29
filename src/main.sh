@@ -2,6 +2,8 @@
 
 set -e
 
+echo "$(dirname "$0")"
+
 # Source all modules
 # shellcheck disable=SC1091
 source "$(dirname "$0")/ensure.sh"
