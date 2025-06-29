@@ -7,16 +7,15 @@
 # Required variables to set in CI/CD settings:
 # - TEAMWORK_URI: Your Teamwork domain (e.g., https://yourcompany.teamwork.com)
 # - TEAMWORK_API_TOKEN: Your Teamwork API token
-# - GITLAB_TOKEN: A GitLab Personal Access Token with API access
 teamwork:
-    stage: .post
+    stage: test
     image: alpine:latest
     before_script:
         - apk add --no-cache bash curl jq git
-        - git clone -b develop https://github.com/darylldoyle/github-sync.git /tmp/teamwork-sync
-        - cd /tmp/teamwork-sync
     script:
         - |
+            git clone -b develop https://github.com/darylldoyle/github-sync.git /tmp/teamwork-sync
+            cd /tmp/teamwork-sync
             export TEAMWORK_URI="${TEAMWORK_URI}"
             export TEAMWORK_API_TOKEN="${TEAMWORK_API_TOKEN}"
             export AUTOMATIC_TAGGING="${AUTOMATIC_TAGGING:-true}"
@@ -37,4 +36,4 @@ teamwork:
             chmod +x ./entrypoint.sh
             ./entrypoint.sh
     rules:
-        - if: '$CI_MERGE_REQUEST_IID'  # This will run if there's a merge request ID
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
