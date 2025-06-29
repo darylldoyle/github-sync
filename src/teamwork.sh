@@ -204,23 +204,15 @@ teamwork::pull_request_opened() {
   local -r base_ref=$("${PLATFORM}"::get_base_ref)
   local -r user=$("${PLATFORM}"::get_sender_user)
   local -r pr_stats=$("${PLATFORM}"::get_pr_patch_stats)
-  local -r pr_body=$("${PLATFORM}"::get_pr_body)
   IFS=" " read -r -a pr_stats_array <<< "$pr_stats"
 
   teamwork::add_comment "
-**$user** opened a PR: **$pr_title**
-[$pr_url]($pr_url)
+**$user** opened a new PR: **[$pr_title]($pr_url)**
 \`$base_ref\` ⬅️ \`$head_ref\`
 
 ---
 
-${pr_body}
-
----
-
-🔢 ${pr_stats_array[0]} commits / 📝 ${pr_stats_array[1]} files updated / ➕ ${pr_stats_array[2]} additions / ➖ ${pr_stats_array[3]} deletions
-
-  "
+🔢 ${pr_stats_array[0]} commits / 📝 ${pr_stats_array[1]} files updated / ➕ ${pr_stats_array[2]} additions / ➖ ${pr_stats_array[3]} deletions"
 
   teamwork::add_tag "PR Open"
   teamwork::move_task_to_column "$BOARD_COLUMN_OPENED"
@@ -238,20 +230,14 @@ teamwork::pull_request_closed() {
   local -r pr_merged=$("${PLATFORM}"::get_pr_merged)
 
   if [ "$pr_merged" == "true" ]; then
-    teamwork::add_comment "
-**$user** merged a PR: **$pr_title**
-[$pr_url]($pr_url)
-"
-  teamwork::add_tag "PR Merged"
-  teamwork::remove_tag "PR Open"
-  teamwork::remove_tag "PR Approved"
-  teamwork::remove_tag "PR Changes Requested"
-  teamwork::move_task_to_column "$BOARD_COLUMN_MERGED"
+    teamwork::add_comment "**$user** merged a the PR \"[$pr_title]($pr_url)\""
+    teamwork::add_tag "PR Merged"
+    teamwork::remove_tag "PR Open"
+    teamwork::remove_tag "PR Approved"
+    teamwork::remove_tag "PR Changes Requested"
+    teamwork::move_task_to_column "$BOARD_COLUMN_MERGED"
   else
-    teamwork::add_comment "
-**$user** closed a PR without merging: **$pr_title**
-[$pr_url]($pr_url)
-"
+    teamwork::add_comment "**$user** closed the PR \"[$pr_title]($pr_url)\"without merging."
     teamwork::remove_tag "PR Open"
     teamwork::remove_tag "PR Approved"
     teamwork::remove_tag "PR Changes Requested"
@@ -269,24 +255,10 @@ teamwork::pull_request_review_submitted() {
   local -r pr_url=$("${PLATFORM}"::get_pr_url)
   local -r pr_title=$("${PLATFORM}"::get_pr_title)
   local -r review_state=$("${PLATFORM}"::get_review_state)
-  local -r comment=$("${PLATFORM}"::get_review_comment)
 
   # Only add a message if the PR has been approved
   if [ "$review_state" == "approved" ]; then
-    local comment_line=""
-    if [ -n "$comment" ] && [ "$comment" != "null" ]; then
-      comment_line="Comment: $comment"
-    fi
-
-    teamwork::add_comment "
-**$user** submitted a review to the PR: **$pr_title**
-[$pr_url]($pr_url)
-
----
-
-Review: **$review_state**
-$comment_line
-"
+    teamwork::add_comment "PR \"[$pr_title]($pr_url)\" approved by **$user**"
 
     teamwork::add_tag "PR Approved"
     teamwork::remove_tag "PR Changes Requested"
@@ -294,20 +266,7 @@ $comment_line
 
   ## Add a message if the PR has change requested, include body message
   if [ "$review_state" == "changes_requested" ]; then
-      local comment_line=""
-      if [ -n "$comment" ] && [ "$comment" != "null" ]; then
-        comment_line="Comment: $comment"
-      fi
-
-      teamwork::add_comment "
-**$user** submitted a change request to the PR: **$pr_title**
-[$pr_url]($pr_url)
-
----
-
-Review: **$review_state**
-$comment_line
-"
+      teamwork::add_comment "**$user** requested a change to the PR: [$pr_title]($pr_url)"
 
       teamwork::add_tag "PR Changes Requested"
       teamwork::remove_tag "PR Approved"
