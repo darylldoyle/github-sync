@@ -1,25 +1,41 @@
-stages:
-    - teamwork-sync
+# Teamwork Integration for GitLab CI/CD
+# Include this in your repository with:
+#
+# include:
+#   - remote: 'https://raw.githubusercontent.com/darylldoyle/github-sync/refs/heads/develop/.gitlab-ci.yml'
+#
+# Required variables to set in CI/CD settings:
+# - TEAMWORK_URI: Your Teamwork domain (e.g., https://yourcompany.teamwork.com)
+# - TEAMWORK_API_TOKEN: Your Teamwork API token
+# - GITLAB_TOKEN: A GitLab Personal Access Token with API access
 
-variables:
-    TEAMWORK_URI: "your-teamwork-domain"
-    TEAMWORK_API_TOKEN: $TEAMWORK_API_TOKEN
-    AUTOMATIC_TAGGING: "true"
-    MAKE_COMMENTS_PRIVATE: "true"
-    BOARD_COLUMN_OPENED: "PR Open"
-    BOARD_COLUMN_MERGED: "Ready to Test"
-    BOARD_COLUMN_CLOSED: "Rejected"
-    BOARD_COLUMN_REVIEWED: "In Review"
-
-teamwork-merge-request-sync:
-    stage: teamwork-sync
+teamwork:
+    stage: .post
     image: alpine:latest
     before_script:
-        - apk add --no-cache bash curl jq
+        - apk add --no-cache bash curl jq git
+        - git clone -b develop https://github.com/darylldoyle/github-sync.git /tmp/teamwork-sync
+        - cd /tmp/teamwork-sync
     script:
-        - chmod +x ./src/main.sh
-        - ./src/main.sh
+        - |
+            export TEAMWORK_URI="${TEAMWORK_URI}"
+            export TEAMWORK_API_TOKEN="${TEAMWORK_API_TOKEN}"
+            export AUTOMATIC_TAGGING="${AUTOMATIC_TAGGING:-true}"
+            export MAKE_COMMENTS_PRIVATE="${MAKE_COMMENTS_PRIVATE:-false}"
+            export BOARD_COLUMN_OPENED="${BOARD_COLUMN_OPENED:-PR Open}"
+            export BOARD_COLUMN_MERGED="${BOARD_COLUMN_MERGED:-Ready to Test}"
+            export BOARD_COLUMN_CLOSED="${BOARD_COLUMN_CLOSED:-Rejected}"
+            export BOARD_COLUMN_REVIEWED="${BOARD_COLUMN_REVIEWED:-In Review}"
+            export GITLAB_TOKEN="${GITLAB_TOKEN}"
+            export ENV="production"
+            
+            # Debug information
+            echo "Running Teamwork GitLab integration"
+            echo "CI_MERGE_REQUEST_IID: $CI_MERGE_REQUEST_IID"
+            echo "CI_MERGE_REQUEST_TITLE: $CI_MERGE_REQUEST_TITLE"
+            
+            # Use entrypoint.sh which will handle execution correctly
+            chmod +x ./entrypoint.sh
+            ./entrypoint.sh
     rules:
-        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    variables:
-        ENV: "production"
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
