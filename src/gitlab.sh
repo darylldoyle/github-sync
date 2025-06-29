@@ -60,7 +60,7 @@ gitlab::get_pr_body() {
 # @return string "true" if merged, else "false".
 # ------------------------------------------------------------------------------
 gitlab::get_pr_merged() {
-  if [ "$CI_MERGE_REQUEST_STATE" == "merged" ]; then
+  if [ "$CI_MERGE_REQUEST_EVENT_TYPE" == "merged_result" ] || [ "$CI_MERGE_REQUEST_EVENT_TYPE" == "merge_train" ]; then
     echo "true"
   else
     echo "false"
@@ -73,11 +73,22 @@ gitlab::get_pr_merged() {
 # @return string Action type.
 # ------------------------------------------------------------------------------
 gitlab::get_action() {
-  # Map GitLab MR states to GitHub-like actions
-  case "$CI_MERGE_REQUEST_STATE" in
-    "opened") echo "opened" ;;
-    "merged"|"closed") echo "closed" ;;
-    *) echo "unknown" ;;
+  # Map GitLab MR states to GitHub-like actions based on event type
+  case "$CI_MERGE_REQUEST_EVENT_TYPE" in
+    "detached")
+      echo "opened"
+      ;;
+    "merged_result"|"merge_train")
+      echo "closed"
+      ;;
+    *)
+      # Fallback to checking project variables
+      if [ -n "$CI_MERGE_REQUEST_IID" ]; then
+        echo "opened"  # Default state when we have an MR ID but unknown event type
+      else
+        echo "unknown"
+      fi
+      ;;
   esac
 }
 
@@ -121,18 +132,27 @@ gitlab::get_review_state() {
     return
   fi
 
+  # First check the CI variable for approval status
+  if [ "$CI_MERGE_REQUEST_APPROVED" == "true" ]; then
+    echo "APPROVED"
+    return
+  fi
+
+  # If not available, fetch from API
   local mr_data
   mr_data=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
     "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID")
 
-  local state
-  state=$(echo "$mr_data" | jq -r '.state // "unknown"')
-  case "$state" in
-    "opened") echo "PENDING" ;;
-    "merged") echo "APPROVED" ;;
-    "closed") echo "DISMISSED" ;;
-    *) echo "UNKNOWN" ;;
-  esac
+  # Check merge request status from API
+  if [ "$(echo "$mr_data" | jq -r '.state // "unknown"')" == "merged" ]; then
+    echo "APPROVED"
+  elif [ "$(echo "$mr_data" | jq -r '.state // "unknown"')" == "closed" ]; then
+    echo "DISMISSED"
+  elif [ "$(echo "$mr_data" | jq -r '.approved // false')" == "true" ]; then
+    echo "APPROVED"
+  else
+    echo "PENDING"
+  fi
 }
 
 # ------------------------------------------------------------------------------
