@@ -151,13 +151,13 @@ teamwork::remove_tag() {
 
 teamwork::pull_request_opened() {
   # Use platform-agnostic function calls
-  local -r pr_url=$(${PLATFORM}::get_pr_url)
-  local -r pr_title=$(${PLATFORM}::get_pr_title)
-  local -r head_ref=$(${PLATFORM}::get_head_ref)
-  local -r base_ref=$(${PLATFORM}::get_base_ref)
-  local -r user=$(${PLATFORM}::get_sender_user)
-  local -r pr_stats=$(${PLATFORM}::get_pr_patch_stats)
-  local -r pr_body=$(${PLATFORM}::get_pr_body)
+  local -r pr_url=$("${PLATFORM}"::get_pr_url)
+  local -r pr_title=$("${PLATFORM}"::get_pr_title)
+  local -r head_ref=$("${PLATFORM}"::get_head_ref)
+  local -r base_ref=$("${PLATFORM}"::get_base_ref)
+  local -r user=$("${PLATFORM}"::get_sender_user)
+  local -r pr_stats=$("${PLATFORM}"::get_pr_patch_stats)
+  local -r pr_body=$("${PLATFORM}"::get_pr_body)
   IFS=" " read -r -a pr_stats_array <<< "$pr_stats"
 
   teamwork::add_comment "
@@ -180,10 +180,10 @@ ${pr_body}
 }
 
 teamwork::pull_request_closed() {
-  local -r user=$(${PLATFORM}::get_sender_user)
-  local -r pr_url=$(${PLATFORM}::get_pr_url)
-  local -r pr_title=$(${PLATFORM}::get_pr_title)
-  local -r pr_merged=$(${PLATFORM}::get_pr_merged)
+  local -r user=$("${PLATFORM}"::get_sender_user)
+  local -r pr_url=$("${PLATFORM}"::get_pr_url)
+  local -r pr_title=$("${PLATFORM}"::get_pr_title)
+  local -r pr_merged=$("${PLATFORM}"::get_pr_merged)
 
   if [ "$pr_merged" == "true" ]; then
     teamwork::add_comment "
@@ -208,11 +208,11 @@ teamwork::pull_request_closed() {
 }
 
 teamwork::pull_request_review_submitted() {
-  local -r user=$(${PLATFORM}::get_sender_user)
-  local -r pr_url=$(${PLATFORM}::get_pr_url)
-  local -r pr_title=$(${PLATFORM}::get_pr_title)
-  local -r review_state=$(${PLATFORM}::get_review_state)
-  local -r comment=$(${PLATFORM}::get_review_comment)
+  local -r user=$("${PLATFORM}"::get_sender_user)
+  local -r pr_url=$("${PLATFORM}"::get_pr_url)
+  local -r pr_title=$("${PLATFORM}"::get_pr_title)
+  local -r review_state=$("${PLATFORM}"::get_review_state)
+  local -r comment=$("${PLATFORM}"::get_review_comment)
 
   # Only add a message if the PR has been approved
   if [ "$review_state" == "approved" ]; then
@@ -259,6 +259,6 @@ $comment_line
 }
 
 teamwork::pull_request_review_dismissed() {
-  local -r user=$(${PLATFORM}::get_sender_user)
+  local -r user=$("${PLATFORM}"::get_sender_user)
   teamwork::add_comment "Review dismissed by $user"
 }

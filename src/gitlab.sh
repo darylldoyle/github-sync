@@ -52,10 +52,15 @@ gitlab::get_pr_patch_stats() {
   mr_data=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
     "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID")
 
-  local commits=$(echo "$mr_data" | jq -r '.commits_count // 0')
-  local changes=$(echo "$mr_data" | jq -r '.changes_count // 0')
-  local additions=$(echo "$mr_data" | jq -r '.additions // 0')
-  local deletions=$(echo "$mr_data" | jq -r '.deletions // 0')
+  local commits
+  local changes
+  local additions
+  local deletions
+
+  commits=$(echo "$mr_data" | jq -r '.commits_count // 0')
+  changes=$(echo "$mr_data" | jq -r '.changes_count // 0')
+  additions=$(echo "$mr_data" | jq -r '.additions // 0')
+  deletions=$(echo "$mr_data" | jq -r '.deletions // 0')
 
   echo "$commits $changes $additions $deletions"
 }
