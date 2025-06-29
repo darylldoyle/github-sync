@@ -200,19 +200,9 @@ teamwork::pull_request_opened() {
   # Use platform-agnostic function calls
   local -r pr_url=$("${PLATFORM}"::get_pr_url)
   local -r pr_title=$("${PLATFORM}"::get_pr_title)
-  local -r head_ref=$("${PLATFORM}"::get_head_ref)
-  local -r base_ref=$("${PLATFORM}"::get_base_ref)
   local -r user=$("${PLATFORM}"::get_sender_user)
-  local -r pr_stats=$("${PLATFORM}"::get_pr_patch_stats)
-  IFS=" " read -r -a pr_stats_array <<< "$pr_stats"
 
-  teamwork::add_comment "
-**$user** opened a new PR: **[$pr_title]($pr_url)**
-\`$base_ref\` ⬅️ \`$head_ref\`
-
----
-
-🔢 ${pr_stats_array[0]} commits / 📝 ${pr_stats_array[1]} files updated / ➕ ${pr_stats_array[2]} additions / ➖ ${pr_stats_array[3]} deletions"
+  teamwork::add_comment "**$user** opened a new PR: **[$pr_title]($pr_url)**"
 
   teamwork::add_tag "PR Open"
   teamwork::move_task_to_column "$BOARD_COLUMN_OPENED"
