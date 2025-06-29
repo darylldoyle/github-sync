@@ -32,8 +32,8 @@ fi
 
 
 # Ensure all required environment variables are set
-ensure::env TEAMWORK_URI
-ensure::env TEAMWORK_API_TOKEN
+ensure::env_variable_exist TEAMWORK_URI
+ensure::env_variable_exist TEAMWORK_API_TOKEN
 
 # Extract task IDs from PR/MR body (using same function name)
 if [ "$PLATFORM" == "gitlab" ]; then
