@@ -8,7 +8,6 @@
 # - TEAMWORK_URI: Your Teamwork domain (e.g., https://yourcompany.teamwork.com)
 # - TEAMWORK_API_TOKEN: Your Teamwork API token
 # - GITLAB_TOKEN: A GitLab Personal Access Token with API access
-
 teamwork:
     stage: .post
     image: alpine:latest
