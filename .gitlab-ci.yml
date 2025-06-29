@@ -38,4 +38,4 @@ teamwork:
             chmod +x ./entrypoint.sh
             ./entrypoint.sh
     rules:
-        - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+        - if: '$CI_MERGE_REQUEST_IID'  # This will run if there's a merge request ID
