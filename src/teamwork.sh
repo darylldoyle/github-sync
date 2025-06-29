@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# /**
-#  * Extracts task IDs from a text body using regex.
-#  *
-#  * @param string Body text to parse.
-#  * @return string Comma-separated task IDs.
-#  */
+# ------------------------------------------------------------------------------
+# Extracts task IDs from a text body using regex.
+#
+# @param string Body text to parse.
+# @return string Comma-separated task IDs.
+# ------------------------------------------------------------------------------
 teamwork::get_task_id_from_body() {
   local body=$1
   local task_ids=()
@@ -22,12 +22,12 @@ teamwork::get_task_id_from_body() {
   echo "$task_ids_str"
 }
 
-# /**
-#  * Retrieves the project ID associated with a given task via the Teamwork API.
-#  *
-#  * @param string Task ID to lookup.
-#  * @return string Project ID.
-#  */
+# ------------------------------------------------------------------------------
+# Retrieves the project ID associated with a given task via the Teamwork API.
+#
+# @param string Task ID to lookup.
+# @return string Project ID.
+# ------------------------------------------------------------------------------
 teamwork::get_project_id_from_task() {
   local -r task_id=$1
 
@@ -43,12 +43,12 @@ teamwork::get_project_id_from_task() {
   echo "$response"
 }
 
-# /**
-#  * Finds a board column ID by name.
-#  *
-#  * @param string Column name to match.
-#  * @return string Column ID.
-#  */
+# ------------------------------------------------------------------------------
+# Finds a board column ID by name.
+#
+# @param string Column name to match.
+# @return string Column ID.
+# ------------------------------------------------------------------------------
 teamwork::get_matching_board_column_id() {
   local -r column_name=$1
 
@@ -73,12 +73,12 @@ teamwork::get_matching_board_column_id() {
   echo "$response"
 }
 
-# /**
-#  * Moves a task to a specified board column.
-#  *
-#  * @param string Column name to move the task into.
-#  * @return void
-#  */
+# ------------------------------------------------------------------------------
+# Moves a task to a specified board column.
+#
+# @param string Column name to move the task into.
+# @return void
+# ------------------------------------------------------------------------------
 teamwork::move_task_to_column() {
   local -r task_id=$TEAMWORK_TASK_ID
   local -r column_name=$1
@@ -107,12 +107,12 @@ teamwork::move_task_to_column() {
   log::message "$response"
 }
 
-# /**
-#  * Adds a comment to a task via the Teamwork API.
-#  *
-#  * @param string Comment body.
-#  * @return void
-#  */
+# ------------------------------------------------------------------------------
+# Adds a comment to a task via the Teamwork API.
+#
+# @param string Comment body.
+# @return void
+# ------------------------------------------------------------------------------
 teamwork::add_comment() {
   local -r body=$1
 
@@ -143,12 +143,12 @@ teamwork::add_comment() {
   log::message "$response"
 }
 
-# /**
-#  * Adds a tag to a task if automatic tagging is enabled.
-#  *
-#  * @param string Tag name to add.
-#  * @return void
-#  */
+# ------------------------------------------------------------------------------
+# Adds a tag to a task if automatic tagging is enabled.
+#
+# @param string Tag name to add.
+# @return void
+# ------------------------------------------------------------------------------
 teamwork::add_tag() {
   local -r tag_name=$1
 
@@ -167,12 +167,12 @@ teamwork::add_tag() {
   fi
 }
 
-# /**
-#  * Removes a tag from a task if automatic tagging is enabled.
-#  *
-#  * @param string Tag name to remove.
-#  * @return void
-#  */
+# ------------------------------------------------------------------------------
+# Removes a tag from a task if automatic tagging is enabled.
+#
+# @param string Tag name to remove.
+# @return void
+# ------------------------------------------------------------------------------
 teamwork::remove_tag() {
   local -r tag_name=$1
 
@@ -191,11 +191,11 @@ teamwork::remove_tag() {
   fi
 }
 
-# /**
-#  * Handles actions when a pull request is opened: comments, tagging, and column movement.
-#  *
-#  * @return void
-#  */
+# ------------------------------------------------------------------------------
+# Handles actions when a pull request is opened: comments, tagging, and column movement.
+#
+# @return void
+# ------------------------------------------------------------------------------
 teamwork::pull_request_opened() {
   # Use platform-agnostic function calls
   local -r pr_url=$("${PLATFORM}"::get_pr_url)
@@ -218,11 +218,11 @@ teamwork::pull_request_opened() {
   teamwork::move_task_to_column "$BOARD_COLUMN_OPENED"
 }
 
-# /**
-#  * Handles cleanup and tagging when a pull request is closed or merged.
-#  *
-#  * @return void
-#  */
+# ------------------------------------------------------------------------------
+# Handles cleanup and tagging when a pull request is closed or merged.
+#
+# @return void
+# ------------------------------------------------------------------------------
 teamwork::pull_request_closed() {
   local -r user=$("${PLATFORM}"::get_sender_user)
   local -r pr_url=$("${PLATFORM}"::get_pr_url)
@@ -245,11 +245,11 @@ teamwork::pull_request_closed() {
   fi
 }
 
-# /**
-#  * Processes pull request review submissions, adding comments and tags for approvals or change requests.
-#  *
-#  * @return void
-#  */
+# ------------------------------------------------------------------------------
+# Processes pull request review submissions, adding comments and tags for approvals or change requests.
+#
+# @return void
+# ------------------------------------------------------------------------------
 teamwork::pull_request_review_submitted() {
   local -r user=$("${PLATFORM}"::get_sender_user)
   local -r pr_url=$("${PLATFORM}"::get_pr_url)
@@ -274,11 +274,11 @@ teamwork::pull_request_review_submitted() {
     fi
 }
 
-# /**
-#  * Adds a comment when a pull request review is dismissed.
-#  *
-#  * @return void
-#  */
+# ------------------------------------------------------------------------------
+# Adds a comment when a pull request review is dismissed.
+#
+# @return void
+# ------------------------------------------------------------------------------
 teamwork::pull_request_review_dismissed() {
   local -r user=$("${PLATFORM}"::get_sender_user)
   teamwork::add_comment "Review dismissed by $user"

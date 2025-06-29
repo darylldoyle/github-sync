@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# /**
-#  * Ensures the specified environment variable exists.
-#  *
-#  * @param string Name of the environment variable to check.
-#  * @exitcode 1 if the variable is not set.
-#  */
+# ------------------------------------------------------------------------------
+# Ensures the specified environment variable exists.
+#
+# @param string Name of the environment variable to check.
+# @exitcode 1 if the variable is not set.
+# ------------------------------------------------------------------------------
 ensure::env_variable_exist() {
   if [[ -z "${!1}" ]]; then
     echoerr "The env variable $1 is required."
@@ -14,12 +14,12 @@ ensure::env_variable_exist() {
 }
 
 
-# /**
-#  * Validates that the total number of arguments matches the expected count.
-#  *
-#  * @param int Expected number of arguments.
-#  * @exitcode 1 if the number of provided arguments is incorrect.
-#  */
+# ------------------------------------------------------------------------------
+# Validates that the total number of arguments matches the expected count.
+#
+# @param int Expected number of arguments.
+# @exitcode 1 if the number of provided arguments is incorrect.
+# ------------------------------------------------------------------------------
 ensure::total_args() {
   local -r received_args=$(( $# - 1 ))
   local -r expected_args=$1

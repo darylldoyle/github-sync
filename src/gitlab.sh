@@ -1,64 +1,64 @@
 #!/usr/bin/env bash
 
-# /**
-#  * Constructs the merge request URL from CI variables.
-#  *
-#  * @return string Merge request URL.
-#  */
+# ------------------------------------------------------------------------------
+# Constructs the merge request URL from CI variables.
+#
+# @return string Merge request URL.
+# ------------------------------------------------------------------------------
 gitlab::get_pr_url() {
   echo "$CI_MERGE_REQUEST_SOURCE_PROJECT_URL/-/merge_requests/$CI_MERGE_REQUEST_IID"
 }
 
-# /**
-#  * Retrieves the merge request title.
-#  *
-#  * @return string MR title.
-#  */
+# ------------------------------------------------------------------------------
+# Retrieves the merge request title.
+#
+# @return string MR title.
+# ------------------------------------------------------------------------------
 gitlab::get_pr_title() {
   echo "$CI_MERGE_REQUEST_TITLE"
 }
 
-# /**
-#  * Retrieves the source branch name of the merge request.
-#  *
-#  * @return string Source branch.
-#  */
+# ------------------------------------------------------------------------------
+# Retrieves the source branch name of the merge request.
+#
+# @return string Source branch.
+# ------------------------------------------------------------------------------
 gitlab::get_head_ref() {
   echo "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
 }
 
-# /**
-#  * Retrieves the target branch name of the merge request.
-#  *
-#  * @return string Target branch.
-#  */
+# ------------------------------------------------------------------------------
+# Retrieves the target branch name of the merge request.
+#
+# @return string Target branch.
+# ------------------------------------------------------------------------------
 gitlab::get_base_ref() {
   echo "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
 }
 
-# /**
-#  * Retrieves the username of the merge request author.
-#  *
-#  * @return string Author login.
-#  */
+# ------------------------------------------------------------------------------
+# Retrieves the username of the merge request author.
+#
+# @return string Author login.
+# ------------------------------------------------------------------------------
 gitlab::get_sender_user() {
   echo "$GITLAB_USER_LOGIN"
 }
 
-# /**
-#  * Retrieves the merge request description.
-#  *
-#  * @return string MR description.
-#  */
+# ------------------------------------------------------------------------------
+# Retrieves the merge request description.
+#
+# @return string MR description.
+# ------------------------------------------------------------------------------
 gitlab::get_pr_body() {
   echo "$CI_MERGE_REQUEST_DESCRIPTION"
 }
 
-# /**
-#  * Checks if the merge request state is merged.
-#  *
-#  * @return string "true" if merged, else "false".
-#  */
+# ------------------------------------------------------------------------------
+# Checks if the merge request state is merged.
+#
+# @return string "true" if merged, else "false".
+# ------------------------------------------------------------------------------
 gitlab::get_pr_merged() {
   if [ "$CI_MERGE_REQUEST_STATE" == "merged" ]; then
     echo "true"
@@ -67,11 +67,11 @@ gitlab::get_pr_merged() {
   fi
 }
 
-# /**
-#  * Maps GitLab merge request state to GitHub-like actions.
-#  *
-#  * @return string Action type.
-#  */
+# ------------------------------------------------------------------------------
+# Maps GitLab merge request state to GitHub-like actions.
+#
+# @return string Action type.
+# ------------------------------------------------------------------------------
 gitlab::get_action() {
   # Map GitLab MR states to GitHub-like actions
   case "$CI_MERGE_REQUEST_STATE" in
@@ -81,11 +81,11 @@ gitlab::get_action() {
   esac
 }
 
-# /**
-#  * Retrieves commit and diff statistics from the GitLab API.
-#  *
-#  * @return string Stats in the format "commits changes additions deletions".
-#  */
+# ------------------------------------------------------------------------------
+# Retrieves commit and diff statistics from the GitLab API.
+#
+# @return string Stats in the format "commits changes additions deletions".
+# ------------------------------------------------------------------------------
 gitlab::get_pr_patch_stats() {
   if [ "$ENV" == "test" ]; then
     echo "1 2 10 5" # commits files additions deletions
@@ -109,11 +109,11 @@ gitlab::get_pr_patch_stats() {
   echo "$commits $changes $additions $deletions"
 }
 
-# /**
-#  * Placeholder for retrieving review state in GitLab.
-#  *
-#  * @return string Review state.
-#  */
+# ------------------------------------------------------------------------------
+# Placeholder for retrieving review state in GitLab.
+#
+# @return string Review state.
+# ------------------------------------------------------------------------------
 gitlab::get_review_state() {
   # get the approval state of the merge request
   if [ "$ENV" == "test" ]; then
@@ -135,11 +135,11 @@ gitlab::get_review_state() {
   esac
 }
 
-# /**
-#  * Placeholder for retrieving review comment in GitLab.
-#  *
-#  * @return string Review comment.
-#  */
+# ------------------------------------------------------------------------------
+# Placeholder for retrieving review comment in GitLab.
+#
+# @return string Review comment.
+# ------------------------------------------------------------------------------
 gitlab::get_review_comment() {
   echo ""
 }
