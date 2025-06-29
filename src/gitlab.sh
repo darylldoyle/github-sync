@@ -115,8 +115,24 @@ gitlab::get_pr_patch_stats() {
 #  * @return string Review state.
 #  */
 gitlab::get_review_state() {
-  # This would need to be implemented based on your GitLab approval setup
-  echo "approved"
+  # get the approval state of the merge request
+  if [ "$ENV" == "test" ]; then
+    echo "APPROVED"
+    return
+  fi
+
+  local mr_data
+  mr_data=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+    "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID")
+
+  local state
+  state=$(echo "$mr_data" | jq -r '.state // "unknown"')
+  case "$state" in
+    "opened") echo "PENDING" ;;
+    "merged") echo "APPROVED" ;;
+    "closed") echo "DISMISSED" ;;
+    *) echo "UNKNOWN" ;;
+  esac
 }
 
 # /**
