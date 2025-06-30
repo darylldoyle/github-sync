@@ -99,6 +99,8 @@ teamwork::move_task_to_column() {
     return
   fi
 
+  echo "Moving task ID: $task_id to column ID: $column_id"
+
   response=$(curl -X "PUT" "$TEAMWORK_URI/tasks/$TEAMWORK_TASK_ID.json" \
       -u "$TEAMWORK_API_TOKEN"':' \
       -H 'Content-Type: application/json; charset=utf-8' \
@@ -135,6 +137,8 @@ teamwork::add_comment() {
       }
     }')
 
+  echo "Adding comment to task ID: $TEAMWORK_TASK_ID"
+
   response=$(curl -X "POST" "$TEAMWORK_URI/tasks/$TEAMWORK_TASK_ID/comments.json" \
        -u "$TEAMWORK_API_TOKEN"':' \
        -H 'Content-Type: application/json; charset=utf-8' \
@@ -158,6 +162,7 @@ teamwork::add_tag() {
   fi
 
   if [ "$AUTOMATIC_TAGGING" == true ]; then
+    echo "Adding tag: $tag_name to task ID: $TEAMWORK_TASK_ID"
     response=$(curl -X "PUT" "$TEAMWORK_URI/tasks/$TEAMWORK_TASK_ID/tags.json" \
        -u "$TEAMWORK_API_TOKEN"':' \
        -H 'Content-Type: application/json; charset=utf-8' \
@@ -182,6 +187,7 @@ teamwork::remove_tag() {
   fi
 
   if [ "$AUTOMATIC_TAGGING" == true ]; then
+    echo "Removing tag: $tag_name from task ID: $TEAMWORK_TASK_ID"
     response=$(curl -X "PUT" "$TEAMWORK_URI/tasks/$TEAMWORK_TASK_ID/tags.json" \
          -u "$TEAMWORK_API_TOKEN"':' \
          -H 'Content-Type: application/json; charset=utf-8' \

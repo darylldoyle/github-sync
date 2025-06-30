@@ -17,16 +17,11 @@ teamwork:
             git clone -b develop https://github.com/darylldoyle/github-sync.git /tmp/teamwork-sync
             cd /tmp/teamwork-sync
             
-            echo "CI_PIPELINE_SOURCE: $CI_PIPELINE_SOURCE"
-            echo "CI_MERGE_REQUEST_IID: $CI_MERGE_REQUEST_IID"
-            echo "event_type: $event_type"
-            echo "action: $action"
-            
             # Standard environment variables
             export TEAMWORK_URI="${TEAMWORK_URI}"
             export TEAMWORK_API_TOKEN="${TEAMWORK_API_TOKEN}"
             export AUTOMATIC_TAGGING="${AUTOMATIC_TAGGING:-true}"
-            export MAKE_COMMENTS_PRIVATE="${MAKE_COMMENTS_PRIVATE:-false}"
+            export MAKE_COMMENTS_PRIVATE="${MAKE_COMMENTS_PRIVATE:-true}"
             export BOARD_COLUMN_OPENED="${BOARD_COLUMN_OPENED:-}"
             export BOARD_COLUMN_MERGED="${BOARD_COLUMN_MERGED:-}"
             export BOARD_COLUMN_CLOSED="${BOARD_COLUMN_CLOSED:-}"
@@ -38,17 +33,12 @@ teamwork:
             if [ "$CI_PIPELINE_SOURCE" == "trigger" ] && [ "$event_type" == "merge_request" ] && [ "$action" == "approved" ]; then
                 # This is a webhook approval event - use merge_request_id from webhook
                 export CI_MERGE_REQUEST_IID="$merge_request_iid"
-                echo "Setting CI_MERGE_REQUEST_IID=$CI_MERGE_REQUEST_IID from webhook payload"
             
                 API_ENDPOINT="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}"
-                echo "Making request to ${API_ENDPOINT} to fetch MR details"
-                echo "GITLAB_TOKEN: $GITLAB_TOKEN"
                 
                 # We need to fetch other MR details since they won't be available as CI variables
                 MR_DATA=$(curl -s --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
                     "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}")
-            
-                echo "Fetched MR data: $MR_DATA"
                 
                 # Set variables that would normally be provided by GitLab CI
                 export CI_MERGE_REQUEST_SOURCE_BRANCH_NAME=$(echo "$MR_DATA" | jq -r '.source_branch')
