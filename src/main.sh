@@ -18,6 +18,15 @@ if [ -n "$GITHUB_EVENT_NAME" ]; then
   PLATFORM="github"
   EVENT_NAME="$GITHUB_EVENT_NAME"
   ACTION=$(github::get_action)
+
+  export GITHUB_TOKEN="$1"
+  export TEAMWORK_URI="$2"
+  export TEAMWORK_API_TOKEN="$3"
+  export AUTOMATIC_TAGGING="$4"
+  export MAKE_COMMENTS_PRIVATE="$5"
+  export BOARD_COLUMN_OPENED="$6"
+  export BOARD_COLUMN_MERGED="$7"
+  export BOARD_COLUMN_CLOSED="$8"
 elif [ -n "$CI_MERGE_REQUEST_IID" ]; then
   # GitLab CI/CD
   # shellcheck disable=SC1091
@@ -30,7 +39,7 @@ else
   exit 1
 fi
 
-
+env::set_environment
 
 # Ensure all required environment variables are set
 ensure::env_variable_exist "TEAMWORK_URI"
