@@ -10,25 +10,26 @@ source "$(dirname "$0")/src/misc.sh"
 # shellcheck disable=SC1091
 source "$(dirname "$0")/src/teamwork.sh"
 
-# Determine platform and source appropriate functions
-if [ -n "$CI_MERGE_REQUEST_IID" ]; then
-  # GitLab CI/CD - use GitLab functions that map to GitHub-like names
-  # shellcheck disable=SC1091
-  source "$(dirname "$0")/src/gitlab.sh"
-  PLATFORM="gitlab"
-  EVENT_NAME="pull_request"
-  ACTION=$(gitlab::get_action)
-elif [ -n "$GITHUB_EVENT_NAME" ]; then
+# Modified platform detection
+if [ -n "$GITHUB_EVENT_NAME" ]; then
   # GitHub Actions
   # shellcheck disable=SC1091
   source "$(dirname "$0")/src/github.sh"
   PLATFORM="github"
   EVENT_NAME="$GITHUB_EVENT_NAME"
   ACTION=$(github::get_action)
+elif [ -n "$CI_MERGE_REQUEST_IID" ]; then
+  # GitLab CI/CD
+  # shellcheck disable=SC1091
+  source "$(dirname "$0")/src/gitlab.sh"
+  PLATFORM="gitlab"
+  EVENT_NAME="pull_request"
+  ACTION=$(gitlab::get_action)
 else
   log::message "Unknown CI platform"
   exit 1
 fi
+
 
 
 # Ensure all required environment variables are set

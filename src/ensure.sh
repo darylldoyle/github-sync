@@ -7,10 +7,18 @@
 # @exitcode 1 if the variable is not set.
 # ------------------------------------------------------------------------------
 ensure::env_variable_exist() {
-  if [[ -z "${!1}" ]]; then
-    log::error "The env variable $1 is required."
-    exit 1
+  if [ -z "$1" ]; then
+    log::error "No variable name provided to ensure::env_variable_exist"
+    return 1
   fi
+
+  # Use eval for better compatibility across shells
+  eval value=\$"$1"
+  if [ -z "$value" ]; then
+    log::error "The env variable \"$1\" is required."
+    return 1  # Return error code instead of exiting
+  fi
+  return 0
 }
 
 
