@@ -66,6 +66,9 @@ for task_id in "${TASK_ID_ARRAY[@]}"; do
   export TEAMWORK_PROJECT_ID
   TEAMWORK_PROJECT_ID=$(teamwork::get_project_id_from_task "$task_id")
 
+  echo "Processing Task ID: $TEAMWORK_TASK_ID in Project ID: $TEAMWORK_PROJECT_ID"
+  echo "Event: $EVENT_NAME, Action: $ACTION"
+
   # Use existing event handling logic - works for both platforms!
   case "$EVENT_NAME" in
     "pull_request")
