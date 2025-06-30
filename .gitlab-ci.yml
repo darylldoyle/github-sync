@@ -42,6 +42,7 @@ teamwork:
             
                 API_ENDPOINT="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}"
                 echo "Making request to ${API_ENDPOINT} to fetch MR details"
+                echo "GITLAB_TOKEN: $GITLAB_TOKEN"
                 
                 # We need to fetch other MR details since they won't be available as CI variables
                 MR_DATA=$(curl -s --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
