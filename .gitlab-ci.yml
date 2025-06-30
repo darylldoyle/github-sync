@@ -22,6 +22,18 @@ teamwork:
             echo "event_type: $event_type"
             echo "action: $action"
             
+            # Standard environment variables
+            export TEAMWORK_URI="${TEAMWORK_URI}"
+            export TEAMWORK_API_TOKEN="${TEAMWORK_API_TOKEN}"
+            export AUTOMATIC_TAGGING="${AUTOMATIC_TAGGING:-true}"
+            export MAKE_COMMENTS_PRIVATE="${MAKE_COMMENTS_PRIVATE:-false}"
+            export BOARD_COLUMN_OPENED="${BOARD_COLUMN_OPENED:-}"
+            export BOARD_COLUMN_MERGED="${BOARD_COLUMN_MERGED:-}"
+            export BOARD_COLUMN_CLOSED="${BOARD_COLUMN_CLOSED:-}"
+            export BOARD_COLUMN_REVIEWED="${BOARD_COLUMN_REVIEWED:-}"
+            export GITLAB_TOKEN="${GITLAB_TOKEN}"
+            export ENV="production"
+            
             # Set up environment based on trigger source
             if [ "$CI_PIPELINE_SOURCE" == "trigger" ] && [ "$event_type" == "merge_request" ] && [ "$action" == "approved" ]; then
                 # This is a webhook approval event - use merge_request_id from webhook
@@ -54,18 +66,6 @@ teamwork:
                 # Regular MR event - all variables should be set by GitLab
                 echo "Processing regular MR event for MR #$CI_MERGE_REQUEST_IID"
             fi
-          
-            # Standard environment variables
-            export TEAMWORK_URI="${TEAMWORK_URI}"
-            export TEAMWORK_API_TOKEN="${TEAMWORK_API_TOKEN}"
-            export AUTOMATIC_TAGGING="${AUTOMATIC_TAGGING:-true}"
-            export MAKE_COMMENTS_PRIVATE="${MAKE_COMMENTS_PRIVATE:-false}"
-            export BOARD_COLUMN_OPENED="${BOARD_COLUMN_OPENED:-}"
-            export BOARD_COLUMN_MERGED="${BOARD_COLUMN_MERGED:-}"
-            export BOARD_COLUMN_CLOSED="${BOARD_COLUMN_CLOSED:-}"
-            export BOARD_COLUMN_REVIEWED="${BOARD_COLUMN_REVIEWED:-}"
-            export GITLAB_TOKEN="${GITLAB_TOKEN}"
-            export ENV="production"
           
             # Use entrypoint.sh which will handle execution correctly
             chmod +x ./entrypoint.sh
