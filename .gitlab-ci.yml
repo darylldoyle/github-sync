@@ -39,6 +39,10 @@ teamwork:
                 # We need to fetch other MR details since they won't be available as CI variables
                 MR_DATA=$(curl -s --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
                     "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}")
+            
+                # We need to fetch Project details since they won't be available as CI variables
+                PROJECT_DATA=$(curl -s --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+                    "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}")
                 
                 # Get the username of the user who approved the MR
                 export GITLAB_USER_LOGIN="$username"
@@ -48,7 +52,7 @@ teamwork:
                 export CI_MERGE_REQUEST_TARGET_BRANCH_NAME=$(echo "$MR_DATA" | jq -r '.target_branch')
                 export CI_MERGE_REQUEST_TITLE=$(echo "$MR_DATA" | jq -r '.title')
                 export CI_MERGE_REQUEST_DESCRIPTION=$(echo "$MR_DATA" | jq -r '.description')
-                export CI_MERGE_REQUEST_SOURCE_PROJECT_URL=$(echo "$MR_DATA" | jq -r '.source.web_url')
+                export CI_MERGE_REQUEST_SOURCE_PROJECT_URL=$(echo "$PROJECT_DATA" | jq -r '.web_url')
                 export CI_MERGE_REQUEST_EVENT_TYPE="pull_request_review"
                 export CI_MERGE_REQUEST_APPROVED="true"
             
