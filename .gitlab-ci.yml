@@ -25,7 +25,7 @@ teamwork:
             # Set up environment based on trigger source
             if [ "$CI_PIPELINE_SOURCE" == "trigger" ] && [ "$event_type" == "merge_request" ] && [ "$action" == "approved" ]; then
                 # This is a webhook approval event - use merge_request_id from webhook
-                export CI_MERGE_REQUEST_IID="$merge_request_id"
+                export CI_MERGE_REQUEST_IID="$merge_request_iid"
                 echo "Setting CI_MERGE_REQUEST_IID=$CI_MERGE_REQUEST_IID from webhook payload"
             
                 API_ENDPOINT="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}"
