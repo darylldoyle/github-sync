@@ -81,6 +81,9 @@ gitlab::get_action() {
     "merged_result"|"merge_train")
       echo "closed"
       ;;
+    "pull_request_review")
+      echo "submitted"
+      ;;
     *)
       # Fallback to checking project variables
       if [ -n "$CI_MERGE_REQUEST_IID" ]; then
@@ -127,7 +130,7 @@ gitlab::get_pr_patch_stats() {
 # ------------------------------------------------------------------------------
 gitlab::get_review_state() {
   # Handle webhook approval events
-  if [ "$CI_MERGE_REQUEST_EVENT_TYPE" == "approval_webhook" ]; then
+  if [ "$CI_MERGE_REQUEST_EVENT_TYPE" == "pull_request_review" ] && [ "$CI_MERGE_REQUEST_APPROVED" == "true" ]; then
     echo "APPROVED"
     return
   fi

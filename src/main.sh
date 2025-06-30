@@ -32,7 +32,7 @@ elif [ -n "$CI_MERGE_REQUEST_IID" ]; then
   # shellcheck disable=SC1091
   source "$(dirname "$0")/src/gitlab.sh"
   PLATFORM="gitlab"
-  EVENT_NAME="pull_request"
+  EVENT_NAME="$CI_MERGE_REQUEST_EVENT_TYPE"
   ACTION=$(gitlab::get_action)
 else
   log::message "Unknown CI platform"
