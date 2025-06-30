@@ -131,20 +131,20 @@ gitlab::get_pr_patch_stats() {
 gitlab::get_review_state() {
   # Handle webhook approval events
   if [ "$CI_MERGE_REQUEST_EVENT_TYPE" == "pull_request_review" ] && [ "$CI_MERGE_REQUEST_APPROVED" == "true" ]; then
-    echo "APPROVED"
+    echo "approved"
     return
   fi
 
   # get the approval state of the merge request
   if [ "$ENV" == "test" ]; then
-    echo "APPROVED"
+    echo "approved"
     return
   fi
 
   # First check the CI variable for approval status
   if [ "$CI_MERGE_REQUEST_APPROVED" == "true" ]; then
-    echo "APPROVED"
-    return
+    echo "approved"
+    returns
   fi
 
   # If not available, fetch from API
@@ -154,13 +154,13 @@ gitlab::get_review_state() {
 
   # Check merge request status from API
   if [ "$(echo "$mr_data" | jq -r '.state // "unknown"')" == "merged" ]; then
-    echo "APPROVED"
+    echo "approved"
   elif [ "$(echo "$mr_data" | jq -r '.state // "unknown"')" == "closed" ]; then
-    echo "DISMISSED"
+    echo "dismissed"
   elif [ "$(echo "$mr_data" | jq -r '.approved // false')" == "true" ]; then
-    echo "APPROVED"
+    echo "approved"
   else
-    echo "PENDING"
+    echo "pending"
   fi
 }
 
