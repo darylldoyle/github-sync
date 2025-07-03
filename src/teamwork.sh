@@ -131,7 +131,7 @@ teamwork::add_comment() {
     '{
       comment: {
         body: $body,
-        notify: true,
+        notify: "",
         "content-type": "text",
         isprivate: $isprivate
       }
